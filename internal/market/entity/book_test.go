@@ -165,9 +165,9 @@ func TestBuyWithDifferentPrice(t *testing.T) {
 	assert.Equal("CLOSED", order2.Status, "Order 2 should be CLOSED")
 	assert.Equal(0, order2.PendingShares, "Order 2 should have 0 PendingShares")
 
-	// assert.Equal(2, len(book.Transactions), "Should have 2 transactions")
-	// assert.Equal(15.0, float64(book.Transactions[0].Total), "Transaction should have price 15")
-	// assert.Equal(10.0, float64(book.Transactions[1].Total), "Transaction should have price 10")
+	assert.Equal(2, len(book.Transactions), "Should have 2 transactions")
+	assert.Equal(15.0, float64(book.Transactions[0].Total), "Transaction should have price 15")
+	assert.Equal(10.0, float64(book.Transactions[1].Total), "Transaction should have price 10")
 }
 
 func TestNoMatch(t *testing.T) {

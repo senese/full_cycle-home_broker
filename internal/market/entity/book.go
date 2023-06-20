@@ -52,7 +52,7 @@ func (b *Book) Trade() {
 			if buyOrders.Len() > 0 && buyOrders.Orders[0].Price >= order.Price {
 				buyOrder := buyOrders.Pop().(*Order)
 				if buyOrder.PendingShares > 0 {
-					transaction := NewTransaction(order, buyOrder, order.Shares, buyOrder.Price)
+					transaction := NewTransaction(order, buyOrder, order.Shares, order.Price)
 					b.AddTransaction(transaction, b.Wg)
 					buyOrder.Transactions = append(buyOrder.Transactions, transaction)
 					order.Transactions = append(buyOrder.Transactions, transaction)
@@ -79,17 +79,16 @@ func (b *Book) AddTransaction(transaction *Transaction, wg *sync.WaitGroup) {
 	}
 
 	transaction.SellingOrder.Investor.UpdateAssetPosition(transaction.SellingOrder.Asset.ID, -minShares)
-	transaction.SellingOrder.PendingShares -= minShares
 	transaction.BuyingOrder.Investor.UpdateAssetPosition(transaction.BuyingOrder.Asset.ID, minShares)
-	transaction.BuyingOrder.PendingShares -= minShares
 
-	transaction.Total = float64(transaction.Shares) * transaction.BuyingOrder.Price
+	transaction.UpdatePendingShares(minShares)
+	transaction.CalculateTotal(minShares, transaction.BuyingOrder.Price)
 
 	if transaction.BuyingOrder.PendingShares == 0 {
-		transaction.BuyingOrder.Status = "CLOSED"
+		transaction.CloseBuyOrder()
 	}
 	if transaction.SellingOrder.PendingShares == 0 {
-		transaction.SellingOrder.Status = "CLOSED"
+		transaction.CloseSellOrder()
 	}
 
 	b.Transactions = append(b.Transactions, transaction)
